@@ -96,5 +96,62 @@ namespace QLHS
                 MessageBox.Show($"Đã xảy ra lỗi: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Question);
             }
         }
+        // DELE DỮ LIỆU
+
+        // Chuỗi kết nối tới SQL Server
+    string connectionString = "Data Source=YOUR_SERVER_NAME;Initial Catalog=QLHS;Integrated Security=True";
+
+    // Lấy dữ liệu từ form
+    string maHS = txtMaHS.Text.Trim();
+
+    // Kiểm tra dữ liệu hợp lệ
+    if (string.IsNullOrEmpty(maHS))
+    {
+        MessageBox.Show("Vui lòng nhập mã học sinh để xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return;
+    }
+
+    // Câu lệnh SQL để xóa dữ liệu
+    string query = "DELETE FROM HOCSINH WHERE MaHS = @MaHS";
+
+    try
+    {
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+
+            using (SqlCommand command = new SqlCommand(query, connection))
+            {
+                // Thêm tham số vào câu lệnh SQL
+                command.Parameters.AddWithValue("@MaHS", maHS);
+
+                // Hiển thị xác nhận trước khi xóa
+                DialogResult result = MessageBox.Show($"Bạn có chắc chắn muốn xóa học sinh với mã '{maHS}' không?", 
+                                                      "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (result == DialogResult.Yes)
+                {
+                    // Thực thi câu lệnh
+                    int rowsAffected = command.ExecuteNonQuery();
+                    if (rowsAffected > 0)
+                    {
+                        MessageBox.Show("Xóa học sinh thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Không tìm thấy học sinh để xóa!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+    }
+    catch (SqlException sqlEx)
+    {
+        MessageBox.Show($"Lỗi cơ sở dữ liệu: {sqlEx.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"Đã xảy ra lỗi không xác định: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
     }
 }
