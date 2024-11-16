@@ -15,6 +15,8 @@ namespace QLHS
     {
         private string connectionString;
 
+        public string maHS { get; private set; }
+
         public Form1()
         {
             InitializeComponent();
@@ -29,16 +31,17 @@ namespace QLHS
             }
         }
 
-        private void luu_Click(object sender, EventArgs e, string connectionString)
+/*        private void luu_Click(object sender, EventArgs e, string connectionString)
         {
 
 
             
 
-        }
+        }*/
 
         private void luu_Click(object sender, EventArgs e)
         {
+            string connectionString = "Data Source=SONTIEN2024\\SQLEXPRESS;Initial Catalog=QLHS;Integrated Security=True";
             string maHS = MaHS.Text.Trim();
             string tenHS = TenHS.Text.Trim();
 
@@ -49,7 +52,7 @@ namespace QLHS
                 MessageBox.Show("Ngày sinh không hợp lệ!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            string ngaySinhStr = ngaySinh.ToString("yyyy-MM-dd");
+            string ngaySinhStr = ngaySinh.ToString("dd-MM-yyyy");
 
             string diaChi = DiaChi.Text.Trim();
             float dtb;
@@ -74,7 +77,7 @@ namespace QLHS
                     {
                         command.Parameters.AddWithValue("@MaHS", maHS);
                         command.Parameters.AddWithValue("@TenHS", tenHS);
-                        command.Parameters.AddWithValue("@NgaySinh", NgaySinh);
+                        command.Parameters.AddWithValue("@NgaySinh", ngaySinh);
                         command.Parameters.AddWithValue("@DiaChi", diaChi);
                         command.Parameters.AddWithValue("@DTB", dtb);
                         command.Parameters.AddWithValue("@MaLop", maLop);
@@ -96,62 +99,48 @@ namespace QLHS
                 MessageBox.Show($"Đã xảy ra lỗi: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Question);
             }
         }
-        // DELE DỮ LIỆU
 
-        // Chuỗi kết nối tới SQL Server
-    string connectionString = "Data Source=YOUR_SERVER_NAME;Initial Catalog=QLHS;Integrated Security=True";
-
-    // Lấy dữ liệu từ form
-    string maHS = txtMaHS.Text.Trim();
-
-    // Kiểm tra dữ liệu hợp lệ
-    if (string.IsNullOrEmpty(maHS))
-    {
-        MessageBox.Show("Vui lòng nhập mã học sinh để xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        return;
-    }
-
-    // Câu lệnh SQL để xóa dữ liệu
-    string query = "DELETE FROM HOCSINH WHERE MaHS = @MaHS";
-
-    try
-    {
-        using (SqlConnection connection = new SqlConnection(connectionString))
+        private void xoa_Click(object sender, EventArgs e)
         {
-            connection.Open();
 
-            using (SqlCommand command = new SqlCommand(query, connection))
+            // Lấy mã học sinh cần xóa
+            string maHS = MaHS.Text.Trim();
+
+            if (string.IsNullOrEmpty(maHS))
             {
-                // Thêm tham số vào câu lệnh SQL
-                command.Parameters.AddWithValue("@MaHS", maHS);
+                MessageBox.Show("Vui lòng nhập mã học sinh để xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
-                // Hiển thị xác nhận trước khi xóa
-                DialogResult result = MessageBox.Show($"Bạn có chắc chắn muốn xóa học sinh với mã '{maHS}' không?", 
-                                                      "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            else { }
 
-                if (result == DialogResult.Yes)
+            
+        }
+
+        private void XoaDongTrongDataGridView(string maHS)
+        {
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                if (row.Cells["MaHS"].Value?.ToString() == maHS)
                 {
-                    // Thực thi câu lệnh
-                    int rowsAffected = command.ExecuteNonQuery();
-                    if (rowsAffected > 0)
-                    {
-                        MessageBox.Show("Xóa học sinh thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show("Không tìm thấy học sinh để xóa!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    dataGridView1.Rows.Remove(row);
+                    break;
                 }
             }
         }
-    }
-    catch (SqlException sqlEx)
-    {
-        MessageBox.Show($"Lỗi cơ sở dữ liệu: {sqlEx.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-    }
-    catch (Exception ex)
-    {
-        MessageBox.Show($"Đã xảy ra lỗi không xác định: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-    }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                // Xóa dữ liệu trong các cột cụ thể
+                dataGridView1.Rows[e.RowIndex].Cells["MaHS"].Value = null;
+                dataGridView1.Rows[e.RowIndex].Cells["DTB"].Value = null;
+                dataGridView1.Rows[e.RowIndex].Cells["TenHS"].Value = null;
+                dataGridView1.Rows[e.RowIndex].Cells["NgaySinh"].Value = null;
+                dataGridView1.Rows[e.RowIndex].Cells["DiaChi"].Value = null;
+                dataGridView1.Rows[e.RowIndex].Cells["MaLop"].Value = null;
+            }
+        }
     }
 }
